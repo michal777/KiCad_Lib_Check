@@ -11,100 +11,100 @@
 #define BUFFER_SIZE 2000
 
 
-int check_name (char *buffer_in, char *footprint_name)
+int check_name_locked (char *buffer_in, char *footprint_name)
 {
 	int n;
 	char read_module_name[MAX_NAME_LENGTH];
+	for (n = 0; buffer_in[n] != '\n'; ++n)
+		if (!strncmp (buffer_in + n, " locked ", strlen (" locked ")))
+			return 1;
 	for (n = 0; (buffer_in[strlen("(module ") + n]) != ' '; ++n)
 		read_module_name[n] = buffer_in[strlen("(module ") + n];
 	read_module_name[n] = '\0';
 	return strcmp (read_module_name, footprint_name);
 }
 
-int fix_name (char *buffer_in, char *footprint_name, char *buffer_out, int *modified)
+int fix_name_locked (char *buffer_in, char *footprint_name, char *buffer_out, int *modified)
 {
 	int n;
 	int m;
 	char rest_of_line[BUFFER_SIZE];
-	if (buffer_in[strlen("(module ")] == '"')		//it's possible that this string contains whitespaces, then it in must be between double quotes
-	{
-		for(n = 0; buffer_in[strlen("(module ") + n + 1] != '"'; ++n)		//must be ...+n+1 to ommit first "
-			{;}
-		n = n + 2;		//here, after adding 2, strlen("(module ") + n points at whitespace after module name in quotation
-	}
-	else		//if there are no doble quotes check how many characters has the string, count until whitespace
-		for(n = 0; (buffer_in[strlen("(module ") + n]) != ' '; ++n)
-			{;}		//if there are no quotation, when for loop ends, strlen("(module ") + n points at whitespace after module name
-	for(m = 0; (buffer_in[strlen("(module ") + n + m - 1]) != '\0'; ++m)		//save rest of line, following "(module " and MODULENAME, copy also \0
-		rest_of_line[m] = buffer_in[strlen("(module ") + n + m];
+	for(n = 0; strncmp (buffer_in + n + 1, " (layer ", strlen(" (layer ")) ; ++n)
+		{;}
+	for(m = 0; (buffer_in[n + m - 1]) != '\n'; ++m)		//save rest of line, following "(module " and MODULENAME, copy also \0
+		rest_of_line[m] = buffer_in[n + m];
 	sprintf (buffer_out, "(module %s%s", footprint_name, rest_of_line);
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
 }
 
-int check_ref (char *buffer_in, char *footprint_name)
+int check_ref (char *buffer_in)
 {
 	int n;
-	char read_reference[MAX_NAME_LENGTH];
+	char read_ref[MAX_NAME_LENGTH];
+	int layer_ok = 0;
+	for (n = 0; buffer_in[n] != '\n'; ++n)
+		if (!strncmp (buffer_in + n, " hide", strlen (" hide")))
+			return 1;
+	for(n = 0; buffer_in[n] != '\n' ; ++n)
+		layer_ok = layer_ok | (! strncmp(buffer_in + n, " (layer F.SilkS)", strlen(" (layer F.SilkS)")));
+	if (! layer_ok)
+		return 1;
 	for (n = 0; (buffer_in[strlen("  (fp_text reference ") + n]) != ' '; ++n)
-		read_reference[n] = buffer_in[strlen("  (fp_text reference ") + n];
-	read_reference[n] = '\0';
-	return strcmp (read_reference, footprint_name);
+		read_ref[n] = buffer_in[strlen("  (fp_text reference ") + n];
+	read_ref[n] = '\0';
+	return strcmp (read_ref, "REF**");
 }
 
-int fix_ref (char *buffer_in, char *footprint_name, char *buffer_out, int *modified)
+int fix_ref (char *buffer_in, char *buffer_out, int *modified)
 {
 	int n;
 	int m;
-	char rest_of_line[BUFFER_SIZE];
-	if (buffer_in[strlen("  (fp_text reference ")] == '"')
-	{
-		for(n = 0; buffer_in[strlen("  (fp_text reference ") + n + 1] != '"'; ++n)
-			{;}
-		n = n + 2;
-	}
-	else
-		for(n = 0; (buffer_in[strlen("  (fp_text reference ") + n]) != ' '; ++n)
-			{;}
-	for(m = 0; (buffer_in[strlen("  (fp_text reference ") + n + m - 1]) != '\0'; ++m)
-		rest_of_line[m] = buffer_in[strlen("  (fp_text reference ") + n + m];
-	sprintf (buffer_out, "  (fp_text reference %s%s", footprint_name, rest_of_line);
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	char text_pos[BUFFER_SIZE];
+	for(n = 0; strncmp (buffer_in + n, "(at ", strlen("(at ")); ++n)
+		{;}
+	for(m = 0; buffer_in[n + m - 1] != ')'; ++m)
+		text_pos[m] = buffer_in[n + m];
+	text_pos[m] = '\0';
+	sprintf (buffer_out, "  (fp_text reference %s %s %s\n", "REF**", text_pos, "(layer F.SilkS)");
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
 }
 
-int check_val (char *buffer_in)
+int check_val (char *buffer_in, char *footprint_name)
 {
 	int n;
 	char read_value[MAX_NAME_LENGTH];
+	int layer_ok = 0;
+	for (n = 0; buffer_in[n] != '\n'; ++n)
+		if (!strncmp (buffer_in + n, " hide", strlen (" hide")))
+			return 1;
+	for(n = 0; buffer_in[n] != '\n' ; ++n)
+		layer_ok = layer_ok | (! strncmp(buffer_in + n, " (layer F.Fab)", strlen(" (layer F.Fab)")));
+	if (! layer_ok)
+		return 1;
 	for (n = 0; (buffer_in[strlen("  (fp_text value ") + n]) != ' '; ++n)
 		read_value[n] = buffer_in[strlen("  (fp_text value ") + n];
 	read_value[n] = '\0';
-	return strcmp (read_value, "VAL**");
+	return strcmp (read_value, footprint_name);
 }
 
-int fix_val (char *buffer_in, char *buffer_out, int *modified)
+int fix_val (char *buffer_in, char *footprint_name, char *buffer_out, int *modified)
 {
 	int n;
 	int m;
-	char rest_of_line[BUFFER_SIZE];
-	if (buffer_in[strlen("  (fp_text value ")] == '"')
-	{
-		for(n = 0; buffer_in[strlen("  (fp_text value ") + n + 1] != '"'; ++n)
-			{;}
-		n = n + 2;
-	}
-	else
-		for(n = 0; (buffer_in[strlen("  (fp_text value ") + n]) != ' '; ++n)
-			{;}
-	for(m = 0; (buffer_in[strlen("  (fp_text value ") + n + m - 1]) != '\0'; ++m)
-		rest_of_line[m] = buffer_in[strlen("  (fp_text value ") + n + m];
-	sprintf (buffer_out, "  (fp_text value %s%s", "VAL**", rest_of_line);
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	char text_pos[BUFFER_SIZE];
+	for(n = 0; strncmp (buffer_in + n, "(at ", strlen("(at ")); ++n)
+		{;}
+	for(m = 0; buffer_in[n + m - 1] != ')'; ++m)
+		text_pos[m] = buffer_in[n + m];
+	text_pos[m] = '\0';
+	sprintf (buffer_out, "  (fp_text value %s %s %s\n", footprint_name, text_pos, "(layer F.Fab)");
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -118,7 +118,7 @@ int check_font (char *buffer_in)
 int fix_font (char *buffer_in, char *buffer_out, int *modified)
 {
 	sprintf (buffer_out, "    (effects (font (size 1 1) (thickness 0.15)))\n");
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -149,7 +149,7 @@ int fix_crtyd_line (char *buffer_in, char *buffer_out, int *modified)
 		beginning_of_line[n] = buffer_in[n];
 	beginning_of_line[n] = '\0';
 	sprintf(buffer_out,"%s (layer F.CrtYd) (width 0.05))\n", beginning_of_line);
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -180,7 +180,7 @@ int fix_silks_line (char *buffer_in, char *buffer_out, int *modified)
 		beginning_of_line[n] = buffer_in[n];
 	beginning_of_line[n] = '\0';
 	sprintf(buffer_out,"%s (layer F.SilkS) (width 0.15))\n", beginning_of_line);
-	printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -228,7 +228,7 @@ int fix_3d (char *buffer_in, char *pretty_name, char *footprint_name, char *path
 
 			rename (path_3d_wings, path_3d_new_wings);
 			sprintf (buffer_out, "  (model %s/%s.wrl\n", pretty_name, footprint_name);
-			printf ("line:\n%swill be replaced with:\n%s", buffer_in, buffer_out);
+			printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 			if (*modified >= 0)
 				*modified += 1;
 			return 0;
@@ -268,6 +268,7 @@ int main (void)
 	char path_to_libs[MAX_NAME_LENGTH];			// path to folder containing .pretty libraries
 	char path_to_models[MAX_NAME_LENGTH];		// path to folder containing 3d models
 
+	int n;										// counter checking filename
 	int i;										// .pretty counter
 	int j;										// .kicad_mod counter
 	char ch;									// char variable (for copying files)
@@ -349,6 +350,20 @@ int main (void)
 			sprintf(footprint_name,"%.*s", (unsigned int)(strlen(footprint_list[j].d_name) - strlen(".kicad_mod")), footprint_list[j].d_name);	//name of footprint (file name without .kicad_mod)
 			modified = 0;
 
+			for (n = 0; pretty_name[n] != '\0'; ++n)
+				if (!( ((pretty_name[n] >= 'a') && (pretty_name[n] <= 'z')) || ((pretty_name[n] >= 'A') && (pretty_name[n] <= 'Z')) || ((pretty_name[n] >= '0') && (pretty_name[n] <= '9')) || (pretty_name[n] == '.') || (pretty_name[n] <= '-') || (pretty_name[n] <= '_') ))
+				{
+					puts ("bad library name");
+					exit (1);
+				}
+			for (n = 0; footprint_name[n] != '\0'; ++n)
+				if (!( ((footprint_name[n] >= 'a') && (footprint_name[n] <= 'z')) || ((footprint_name[n] >= 'A') && (footprint_name[n] <= 'Z')) || ((footprint_name[n] >= '0') && (footprint_name[n] <= '9')) || (footprint_name[n] == '.') || (footprint_name[n] <= '-') || (footprint_name[n] <= '_') ))
+				{
+					puts ("bad footprint name");
+					exit (1);
+				}
+
+
 			if ((file_kicad_mod = fopen(kicad_mod_path, "rt")) != NULL)		//open footprint to edit
 			{
 				if ((file_kicad_mod_tmp = tmpfile ()) != NULL)		//create temporary file - write to it and next copy to footprint
@@ -360,43 +375,43 @@ int main (void)
 //------------------------------------------------------
 						if ((strncmp("(module ", buffer_in, strlen("(module ")) == 0))
 						{
-							if (check_name (buffer_in, footprint_name))
+							if (check_name_locked (buffer_in, footprint_name))
 							{
-								printf ("%s: %s\n	warning: module name not equal to footprint name\n", pretty_name, footprint_name);
+								printf ("%s: %s\n	warning: module name not equal to footprint name or footprint locked\n", pretty_name, footprint_name);
 								printf ("	fix it? (press y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
 								if (confirm == 'y')
-									fix_name (buffer_in, footprint_name, buffer_out, &modified);
+									fix_name_locked (buffer_in, footprint_name, buffer_out, &modified);
 							}
 						}
 //-------
 						else if ((strncmp("  (fp_text reference ", buffer_in, strlen("  (fp_text reference ")) == 0))
 						{
-							if (check_ref (buffer_in, footprint_name))
+							if (check_ref (buffer_in))
 							{
-								printf ("%s: %s\n	warning: reference not equal to footprint name\n", pretty_name, footprint_name);
+								printf ("%s: %s\n	warning: reference not equal to REF** or hidden or wrong layer\n", pretty_name, footprint_name);
 								printf ("	fix it? (press y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
 								if (confirm == 'y')
-									fix_ref (buffer_in, footprint_name, buffer_out, &modified);
+									fix_ref (buffer_in, buffer_out, &modified);
 							}
 						}
 
 						else if ((strncmp("  (fp_text value ", buffer_in, strlen("  (fp_text value ")) == 0))
 						{
-							if (check_val (buffer_in))
+							if (check_val (buffer_in, footprint_name))
 							{
-								printf ("%s: %s\n	warning: value not equal to VAL**\n", pretty_name, footprint_name);
+								printf ("%s: %s\n	warning: value not equal to footprint name or hidden or wrong layer\n", pretty_name, footprint_name);
 								printf ("	fix it? (press y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
 								if (confirm == 'y')
-									fix_val (buffer_in, buffer_out, &modified);
+									fix_val (buffer_in, footprint_name, buffer_out, &modified);
 							}
 						}
 //-------

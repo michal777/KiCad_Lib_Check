@@ -1,0 +1,29 @@
+Tool checking some of KiCad Library Convention rules in footprints (pretty format)
+
+Author: Michał Stec
+
+Tests and fixes:
+- wrong module name in file header (not equal to footprint name), footprint locked (shouldn't be locked in library)
+- commas in tags (should be spaces)
+- reference wrong or on wrong layer (should be **REF on silkscreen)
+- value wrong or on wrong layer (should be footprint name on assembly)
+- font size (should be 1 x 1 mm, line 0.15 mm)
+- wrong courtyard or silkscreen line width (should be 0.05 mm and 0.15 mm)
+- settings that are usually not necessary in official library (autoplace cost, solder paste settings, clearance at footprint level)
+- not standard 3d link (should be *.3dshapes/*.wrl), moves files to standard location in packages3d/
+
+Additional tests:
+- information if reference, value, silkscreen or courtyard line is on bottom layer (usually all are on top)
+- warning if courtyard is not rounded to 0.05 mm (must be rounded)
+- information if most of pads are tht and attribute is normal+insert or pads are smd and attribute is normal
+
+Usage:
+1. Make a copy of your footprint libraries and 3d models (.wrl/.wings) that you want to modify
+2. Run lib_check_lin in linux console or lib_check_win.exe in windows command line
+3. Enter path to directory containing .pretty libraries (program iterates over all .kicad_mod in all .pretty libraries in given location)
+4. Enter path to directory containing directories with .wrl/wings files (...kicad-library/modules/packages3d)
+5. Read warnings, errors and other informations, answer questions (y - yes, n - no, + ENTER)
+6. Make sure the changes are OK (check in KiCad), if there were problems not fixed by lib_check... (eg. courtyard rounding)- fix manually
+7. Run lib_check_lin or lib_check_win.exe again to make sure that all is fixed
+
+This program modifies files on your computer. Enter valid paths and make backup copy of libraries and models that you want to change. USE AT YOUR OWN RISK.

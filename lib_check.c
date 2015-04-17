@@ -89,7 +89,7 @@ int fix_name_locked (char *buffer_in, char *footprint_name, char *buffer_out, in
 
 	sprintf (buffer_out, "(module %s%s", footprint_name, rest_of_line);		// assembly first line: take proper name, ignore " locked ", copy layer and time-stamp
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)		// increment value of modified only if there were no errors (modified == -1)
 		*modified += 1;
 	return 0;
@@ -123,7 +123,7 @@ int fix_tags (char *buffer_in, char *buffer_out, int *modified)
 	}
 	buffer_out[m] = '\0';
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -176,7 +176,7 @@ int fix_ref (char *buffer_in, char *buffer_out, int *modified)
 		if ((! strncmp (buffer_in + n, " (layer B.SilkS)", strlen(" (layer B.SilkS)"))) || (! strncmp (buffer_in + n, " (layer B.Fab)", strlen(" (layer B.Fab)"))))
 			sprintf (buffer_out, "  (fp_text reference %s %s %s\n", "REF**", text_pos, "(layer B.SilkS)");		// assembly line with default reference at original position (overwrite), keep on B.SilkS if it was on B.SilkS or B.Fab
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -229,7 +229,7 @@ int fix_val (char *buffer_in, char *footprint_name, char *buffer_out, int *modif
 		if ((! strncmp (buffer_in + n, " (layer B.Fab)", strlen(" (layer B.Fab)"))) || (! strncmp (buffer_in + n, " (layer B.SilkS)", strlen(" (layer B.SilkS)"))))
 			sprintf (buffer_out, "  (fp_text value %s %s %s\n", footprint_name, text_pos, "(layer B.Fab)");		// assembly line with default value at original position (overwrite), keep on B.Fab if it was on B.Fab or B.SilkS
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -246,7 +246,7 @@ int fix_font (char *buffer_in, char *buffer_out, int *modified)
 {
 	sprintf (buffer_out, "    (effects (font (size 1 1) (thickness 0.15)))\n");
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -325,7 +325,7 @@ int fix_line (char *buffer_in, char *buffer_out, int *modified)
 			for (m = 0; (strncmp(buffer_in + m, " (layer ", strlen(" (layer ")) != 0); ++m)
 				beginning_of_line[m] = buffer_in[m];
 			beginning_of_line[m] = '\0';
-			sprintf(buffer_out,"%s (layer F.CrtYd) (width 0.05))\n", beginning_of_line);
+			sprintf (buffer_out,"%s (layer F.CrtYd) (width 0.05))\n", beginning_of_line);
 		}
 	for (n = 0; buffer_in[n] != '\n'; ++n)		// set width of F.SilkS line
 		if (!strncmp (buffer_in + n, " (layer F.SilkS) ", strlen (" (layer F.SilkS) ")))
@@ -333,7 +333,7 @@ int fix_line (char *buffer_in, char *buffer_out, int *modified)
 			for (m = 0; (strncmp(buffer_in + m, " (layer ", strlen(" (layer ")) != 0); ++m)
 				beginning_of_line[m] = buffer_in[m];
 			beginning_of_line[m] = '\0';
-			sprintf(buffer_out,"%s (layer F.SilkS) (width 0.15))\n", beginning_of_line);
+			sprintf (buffer_out,"%s (layer F.SilkS) (width 0.15))\n", beginning_of_line);
 		}
 	for (n = 0; buffer_in[n] != '\n'; ++n)		// set width of B.CrtYd line
 		if (!strncmp (buffer_in + n, " (layer B.CrtYd) ", strlen (" (layer B.CrtYd) ")))
@@ -341,7 +341,7 @@ int fix_line (char *buffer_in, char *buffer_out, int *modified)
 			for (m = 0; (strncmp(buffer_in + m, " (layer ", strlen(" (layer ")) != 0); ++m)
 				beginning_of_line[m] = buffer_in[m];
 			beginning_of_line[m] = '\0';
-			sprintf(buffer_out,"%s (layer B.CrtYd) (width 0.05))\n", beginning_of_line);
+			sprintf (buffer_out,"%s (layer B.CrtYd) (width 0.05))\n", beginning_of_line);
 		}
 	for (n = 0; buffer_in[n] != '\n'; ++n)		// set width of B.SilkS line
 		if (!strncmp (buffer_in + n, " (layer B.SilkS) ", strlen (" (layer B.SilkS) ")))
@@ -349,10 +349,10 @@ int fix_line (char *buffer_in, char *buffer_out, int *modified)
 			for (m = 0; (strncmp(buffer_in + m, " (layer ", strlen(" (layer ")) != 0); ++m)
 				beginning_of_line[m] = buffer_in[m];
 			beginning_of_line[m] = '\0';
-			sprintf(buffer_out,"%s (layer B.SilkS) (width 0.15))\n", beginning_of_line);
+			sprintf (buffer_out,"%s (layer B.SilkS) (width 0.15))\n", beginning_of_line);
 		}
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -369,7 +369,7 @@ int fix_unnecessary (char *buffer_in, char *buffer_out, int *modified)
 {
 	strcpy (buffer_out, "");
 
-	printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+	printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 	if (*modified >= 0)
 		*modified += 1;
 	return 0;
@@ -379,7 +379,7 @@ int fix_unnecessary (char *buffer_in, char *buffer_out, int *modified)
 int check_3d (char *buffer_in, char *pretty_name, char *footprint_name)
 {
 	char link_3d[BUFFER_SIZE];
-	sprintf(link_3d,"  (model %s.3dshapes/%s.wrl\n", pretty_name, footprint_name);
+	sprintf (link_3d,"  (model %s.3dshapes/%s.wrl\n", pretty_name, footprint_name);
 	return strcmp (buffer_in, link_3d);
 }
 
@@ -427,7 +427,7 @@ int fix_3d (char *buffer_in, char *pretty_name, char *footprint_name, char *path
 	if (quoted && ! strcmp (path_3d_wrl, path_3d_new_wrl))		// if the path is correct but quoted - quotation will be removed
 	{
 		sprintf (buffer_out, "  (model %s.3dshapes/%s.wrl\n", pretty_name, footprint_name);		// remove quotation in path to 3d model in .kicad_mod file
-		printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+		printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 		if (*modified >= 0)
 			*modified += 1;
 		return 0;
@@ -440,7 +440,7 @@ int fix_3d (char *buffer_in, char *pretty_name, char *footprint_name, char *path
 				fputc (intc, file_wrl_tmp);
 			fclose (file_wrl);
 			sprintf (buffer_out, "  (model %s.3dshapes/%s.wrl\n", pretty_name, footprint_name);		// set new path to 3d model in .kicad_mod file
-			printf ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
+			printf_YELLOW ("line:\n%swill be replaced with:\n%s\n\n", buffer_in, buffer_out);
 		}
 		else		// don't allow to modify anything if wrong 3d link
 		{
@@ -459,7 +459,7 @@ int fix_3d (char *buffer_in, char *pretty_name, char *footprint_name, char *path
 		else	// if .wings corresponding with .wrl not exist, ask if it should exist, if it should but not found - error (won't modify)
 		{
 			printf_YELLOW ("Couldn't open .wings file\n");
-			printf ("	does it exist? (enter y for yes or n for no)\n");		// ask if .wings exists
+			printf_YELLOW ("	does it exist? (enter y for yes or n for no)\n");		// ask if .wings exists
 			do
 				scanf (" %c", &confirm);
 			while ((confirm != 'y') && (confirm != 'n'));
@@ -574,7 +574,7 @@ int main (void)
 		//---------------------------------------------------------------
 		//	get list of .kicad_mod footprints in current .pretty library
 		//---------------------------------------------------------------
-		sprintf(pretty_path,"%s/%s", path_to_libs, pretty_list[i].d_name);
+		sprintf (pretty_path,"%s/%s", path_to_libs, pretty_list[i].d_name);
 		dir_library = opendir (pretty_path);		//open .pretty with footprints to modify
 		if (dir_library != NULL)
 		{
@@ -601,9 +601,9 @@ int main (void)
 		//---------------------------------------------------------------
 		for (j = 0; strcmp(footprint_list[j].d_name, "||\\//||") != 0; ++j)
 		{
-			sprintf(kicad_mod_path,"%s/%s/%s", path_to_libs, pretty_list[i].d_name, footprint_list[j].d_name);		//prepare path to read original .kicad_mod file
-			sprintf(pretty_name,"%.*s", (unsigned int)(strlen(pretty_list[i].d_name) - strlen(".pretty")), pretty_list[i].d_name);	//name of pretty library (directory name without .pretty)
-			sprintf(footprint_name,"%.*s", (unsigned int)(strlen(footprint_list[j].d_name) - strlen(".kicad_mod")), footprint_list[j].d_name);	//name of footprint (file name without .kicad_mod)
+			sprintf (kicad_mod_path,"%s/%s/%s", path_to_libs, pretty_list[i].d_name, footprint_list[j].d_name);		//prepare path to read original .kicad_mod file
+			sprintf (pretty_name,"%.*s", (unsigned int)(strlen(pretty_list[i].d_name) - strlen(".pretty")), pretty_list[i].d_name);	//name of pretty library (directory name without .pretty)
+			sprintf (footprint_name,"%.*s", (unsigned int)(strlen(footprint_list[j].d_name) - strlen(".kicad_mod")), footprint_list[j].d_name);	//name of footprint (file name without .kicad_mod)
 			modified = 0;
 			change_3d = 0;
 			wings_exists = 0;
@@ -639,7 +639,7 @@ int main (void)
 							if (check_name_locked (buffer_in, footprint_name))
 							{
 								printf_YELLOW ("%s: %s\n	warning: module name not equal to footprint name or footprint locked\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -653,7 +653,7 @@ int main (void)
 							if (check_tags (buffer_in))
 							{
 								printf_YELLOW ("%s: %s\n	warning: comma in tags found\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -667,7 +667,7 @@ int main (void)
 							if (check_ref (buffer_in, pretty_name, footprint_name))
 							{
 								printf_YELLOW ("%s: %s\n	warning: reference not equal to REF** or hidden or wrong layer\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -681,7 +681,7 @@ int main (void)
 							if (check_val (buffer_in, pretty_name, footprint_name))
 							{
 								printf_YELLOW ("%s: %s\n	warning: value not equal to footprint name or hidden or wrong layer\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -695,7 +695,7 @@ int main (void)
 							if (check_font (buffer_in))
 							{
 								printf_YELLOW ("%s: %s\n	warning: text size is not 1 x 1 x 0.15 mm\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -709,7 +709,7 @@ int main (void)
 							if (check_line (buffer_in, pretty_name, footprint_name))
 							{
 								printf_YELLOW ("%s: %s\n	warning: silkscreen line width not equal to 0.15 or courtyard line width not equal to 0.05\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -723,7 +723,7 @@ int main (void)
 							if (check_unnecessary ())
 							{
 								printf_YELLOW ("%s: %s\n	warning: unnecessary footprint properties set\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -738,7 +738,7 @@ int main (void)
 							if (check_3d (buffer_in, pretty_name, footprint_name))
 							{
 								printf_YELLOW ("%s: %s\n	warning: 3d model path not equal to footprint path\n", pretty_name, footprint_name);
-								printf ("	fix it? (enter y for yes or n for no)");
+								printf_YELLOW ("	fix it? (enter y for yes or n for no)");
 								do
 									scanf (" %c", &confirm);
 								while ((confirm != 'y') && (confirm != 'n'));
@@ -771,7 +771,10 @@ int main (void)
 					}
 				}
 				else
+				{
 					printf_RED ("Couldn't create temporary files\n");
+					exit (1);
+				}
 				fclose (file_kicad_mod);
 			}
 			else
@@ -848,7 +851,7 @@ int main (void)
 				printf_RED ("\nFAILED!!!\n	%s/%s not changed\n\n", pretty_name, footprint_name);
 			fclose (file_kicad_mod_tmp);
 			fclose (file_wrl_tmp);
-
+			fclose (file_wings_tmp);
 
 			if ((smd - tht > 0) && (attr == 0))
 				printf_CYAN ("\n%s/%s\n	INFO: attributes are 'normal' but most of pads are SMD\n	please check attributes\n", pretty_name, footprint_name);
